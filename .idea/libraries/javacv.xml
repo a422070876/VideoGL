@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="javacv">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/../TestJavaCV/lib/javacv.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../TestJavaCV/lib/ffmpeg-windows-x86_64.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../TestJavaCV/lib/ffmpeg.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../TestJavaCV/lib/javacpp-windows-x86_64.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../TestJavaCV/lib/javacpp.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
