@@ -24,7 +24,7 @@ import static org.lwjgl.system.jawt.JAWTFunctions.*;
 
 public class LWJGLCanvas extends Canvas {
 
-    private final JAWT awt;
+    private JAWT awt;
 
     private JAWTDrawingSurface ds;
 
@@ -300,10 +300,14 @@ public class LWJGLCanvas extends Canvas {
         JAWT_FreeDrawingSurface(ds, awt.FreeDrawingSurface());
 
         awt.free();
+        awt = null;
 
         if (context != NULL) {
             glfwDestroyWindow(context);
         }
+    }
+    public boolean isDestroy(){
+        return awt == null;
     }
 
     public interface Renderer {

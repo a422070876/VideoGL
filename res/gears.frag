@@ -15,5 +15,6 @@ uniform sampler2D sTexture;
 #endif
 
 void main() {
-    out_Color = texture(sTexture ,  vec2(vTexCoord.x , 1.0 - vTexCoord.y));
+    vec4 rgba = texture(sTexture ,  vec2(vTexCoord.x , 1.0 - vTexCoord.y));
+    out_Color = rgba;
 }

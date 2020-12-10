@@ -2,6 +2,7 @@ package com.hyq.hm.video.gl;
 import org.lwjgl.BufferUtils;
 
 import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferByte;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -21,13 +22,22 @@ public class GLRenderer implements LWJGLCanvas.Renderer {
     private int uTextureSamplerHandle;
 
 
-    private int imageWidth,imageHeight;
+    private int imageWidth,imageHeight,internalformat;
     private ByteBuffer imageBuffer;
     public void setImage(BufferedImage image){
         synchronized (textures) {
+            internalformat = GL_RGBA;
             imageWidth = image.getWidth();
             imageHeight = image.getHeight();
             imageBuffer = imageToBuffer(image);
+        }
+    }
+    public void setBuffer (ByteBuffer buffer,int width,int height){
+        synchronized (textures) {
+            internalformat = GL_RGB;
+            imageWidth = width;
+            imageHeight = height;
+            imageBuffer = buffer;
         }
     }
 
@@ -88,7 +98,7 @@ public class GLRenderer implements LWJGLCanvas.Renderer {
         glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imageWidth, imageHeight,0, GL_RGBA, GL_UNSIGNED_BYTE, imageBuffer);
+//        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, imageWidth, imageHeight,0, GL_RGB, GL_UNSIGNED_BYTE, imageBuffer);
         glBindTexture(GL_TEXTURE_2D, 0);
     }
     private int screenWidth,screenHeight;
@@ -100,7 +110,7 @@ public class GLRenderer implements LWJGLCanvas.Renderer {
 
     @Override
     public void onDrawFrame() {
-        if(programId == -1){
+        if(programId == -1 || imageBuffer == null){
             return;
         }
         viewportSize(screenWidth,screenHeight,imageWidth,imageHeight);
@@ -111,8 +121,7 @@ public class GLRenderer implements LWJGLCanvas.Renderer {
         synchronized (textures){
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, textures[0]);
-//            glTexSubImage2D(GL_TEXTURE_2D, 0,0, 0, imageWidth,imageHeight, GL_RGBA, GL_UNSIGNED_BYTE, imageBuffer);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imageWidth, imageHeight,0, GL_RGBA, GL_UNSIGNED_BYTE, imageBuffer);
+            glTexImage2D(GL_TEXTURE_2D, 0, internalformat, imageWidth, imageHeight,0, internalformat, GL_UNSIGNED_BYTE, imageBuffer);
             glUniform1i(uTextureSamplerHandle, 0);
         }
 
@@ -151,11 +160,18 @@ public class GLRenderer implements LWJGLCanvas.Renderer {
     }
 
     public static ByteBuffer imageToBuffer(BufferedImage image) {
+//        TYPE_4BYTE_ABGR可直接用,Shader里要改成out_Color = vec4(rgba.a,rgba.b,rgba.g,rgba.r);
+//        final byte[] targetPixels = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
+//        ByteBuffer buffer = BufferUtils.createByteBuffer(targetPixels.length);
+//        buffer.put(targetPixels);
+
+
+//      将图片数据转成RGBA格式
         int width = image.getWidth();
         int height = image.getHeight();
         int[] pixels = new int[width * height];
         image.getRGB(0, 0, width, height, pixels, 0, width);
-        ByteBuffer buffer = BufferUtils.createByteBuffer(width * height * 4);
+        ByteBuffer buffer = BufferUtils.createByteBuffer(width*height*4);
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 int pixel = pixels[y * width + x];
